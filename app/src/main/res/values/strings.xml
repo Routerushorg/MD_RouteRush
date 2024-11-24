@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">RouteRush</string>
+    <string name="logo">AppLogo</string>
+    <string name="imglogo">RouteRushLogo</string>
+    <string name="route_rush">Route Rush</string>
+    <string name="loginbtn">Login</string>
+    <string name="sign_inbtn">Sign In</string>
 </resources>
