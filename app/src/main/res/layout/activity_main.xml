@@ -49,18 +49,21 @@
             android:text="@string/btn_login"
             android:background="@drawable/rounded_button"
             android:fontFamily="@font/robotosemibold"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
 
         <!-- Sign In Button -->
         <Button
             android:id="@+id/signInButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/rounded_button"
             android:layout_weight="1"
             android:fontFamily="@font/robotosemibold"
-            android:text="@string/btn_SignIn" />
+            android:text="@string/btn_SignIn"
+            />
     </LinearLayout>
 
 </RelativeLayout>
