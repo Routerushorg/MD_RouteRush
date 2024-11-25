@@ -11,7 +11,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="200dp"
-        android:contentDescription="@string/imglogo"
+        android:contentDescription="@string/logo_image"
         android:src="@drawable/route_rush_logo" />
 
     <!-- Name TextView -->
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/loginbtn"
+            android:text="@string/btn_login"
             android:background="@drawable/rounded_button"
             android:fontFamily="@font/robotosemibold"
             android:layout_marginEnd="8dp"/>
@@ -60,7 +60,7 @@
             android:background="@drawable/rounded_button"
             android:layout_weight="1"
             android:fontFamily="@font/robotosemibold"
-            android:text="@string/sign_inbtn" />
+            android:text="@string/btn_SignIn" />
     </LinearLayout>
 
 </RelativeLayout>

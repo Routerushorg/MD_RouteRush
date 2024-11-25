@@ -1,12 +1,11 @@
-package com.example.routerush
+package com.example.routerush.main
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.routerush.register.RegisterActivity
 import com.example.routerush.databinding.ActivityMainBinding
+import com.example.routerush.login.LoginActivity
 
 class MainActivity : AppCompatActivity() {
 
