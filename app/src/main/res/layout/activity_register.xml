@@ -35,7 +35,6 @@
                 android:textSize="24sp"
                 android:fontFamily="@font/mulish_extra_bold"
                 android:textStyle="bold"
-                android:textColor="@color/black"
                 android:gravity="start"
                 />
 
@@ -104,8 +103,7 @@
                 android:fontFamily="@font/robotosemibold"
                 android:background="@drawable/rounded_button"
                 android:text="@string/btn_register"
-                android:backgroundTint="@color/lightblue"
-                android:textColor="@color/darkblue" />
+                android:backgroundTint="@color/lightblue" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

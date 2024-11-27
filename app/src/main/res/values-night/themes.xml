@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.RouteRush" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <item name="colorPrimary">@color/lightblue</item>
-        <item name="colorOnPrimary">@color/darkblue</item>
+        <item name="colorPrimary">@color/darkblue</item>
+        <item name="colorOnPrimary">@color/lightblue</item>
     </style>
 </resources>
