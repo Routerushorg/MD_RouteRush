@@ -1,7 +1,6 @@
 package com.example.routerush.data.remote
 
 import com.example.routerush.data.response.LoginResponse
-import com.example.routerush.data.response.RegisterResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Field
@@ -21,7 +20,7 @@ interface ApiService {
         @Field("name") name: String,
         @Field("email") email: String,
         @Field("password") password: String
-    ): RegisterResponse
+    ): LoginResponse
 
     @FormUrlEncoded
     @POST("login")

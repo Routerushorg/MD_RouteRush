@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="16dp">
+
+    <!-- menu ini aja referensi gak terpakai dalam app-->
+    <!-- Bagian Atas: Informasi Pengguna -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="left"
+        android:paddingBottom="24dp">
+
+        <!-- Nama Pengguna -->
+        <TextView
+            android:id="@+id/tv_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_placeholder"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <!-- Email Pengguna -->
+        <TextView
+            android:id="@+id/tv_user_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/email_placeholder"
+            android:textSize="20sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- Tombol Logout -->
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_button"
+            android:text="Logout"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Bagian Bawah: Tombol Add Route -->
+    <Button
+        android:id="@+id/btn_add_route"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_add_route"
+        android:background="@drawable/rounded_button"
+        android:layout_marginBottom="16dp" />
+</LinearLayout>
