@@ -21,4 +21,16 @@
     <string name="email_placeholder">user@example.com</string>
     <string name="btn_add_route">Add Route</string>
     <string name="logout">Logout</string>
+    <string name="next">Lanjut</string>
+    <string name="register_success">Register Berhasil!</string>
+    <string name="register_fail">Register Gagal</string>
+    <string name="register_success_message">Silahkan Login!</string>
+    <string name="retry">Silahkan Coba Lagi!</string>
+    <string name="error_empty">Harap isi semua kolom</string>
+    <string name="error_invalid_email">Tolong gunakan Format Email yang benar!</string>
+    <string name="error_short_password">Password tidak boleh kurang dari 8 karakter</string>
+    <string name="error_empty_password">Password masih Kosong!</string>
+    <string name="error_empty_email">email masih kosong!</string>
+    <string name="error_empty_name">Nama masih Kosong!</string>
+    <string name="error_existingemail">Email Sudah Ada</string>
 </resources>

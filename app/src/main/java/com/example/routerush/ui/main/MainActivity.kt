@@ -1,11 +1,11 @@
-package com.example.routerush.main
+package com.example.routerush.ui.main
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.routerush.register.RegisterActivity
+import com.example.routerush.ui.register.RegisterActivity
 import com.example.routerush.databinding.ActivityMainBinding
-import com.example.routerush.login.LoginActivity
+import com.example.routerush.ui.login.LoginActivity
 
 class MainActivity : AppCompatActivity() {
 

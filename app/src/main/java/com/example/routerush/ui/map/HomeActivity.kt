@@ -1,4 +1,4 @@
-package com.example.routerush.map
+package com.example.routerush.ui.map
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.routerush.databinding.ActivityHomeBinding
-import com.example.routerush.login.LoginActivity
+import com.example.routerush.ui.login.LoginActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 
