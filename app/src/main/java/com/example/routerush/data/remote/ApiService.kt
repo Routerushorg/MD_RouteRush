@@ -23,10 +23,13 @@ interface ApiService {
     ): LoginAndRegisterResponse
 
     @FormUrlEncoded
-    @POST("login")
+    @POST("signin")
     suspend fun login(
         @Field("email") email: String,
         @Field("password") password: String
     ): LoginAndRegisterResponse
+
+    @POST("signout")
+    suspend fun signout(): LoginAndRegisterResponse
 
 }

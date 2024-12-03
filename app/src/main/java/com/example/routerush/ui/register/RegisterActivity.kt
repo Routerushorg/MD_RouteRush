@@ -88,6 +88,7 @@ class RegisterActivity : AppCompatActivity() {
                 else -> {
                     // Semua validasi berhasil, lanjutkan dengan registrasi
                     viewModel.register(name, email, password)
+
                 }
             }
         }

@@ -24,7 +24,6 @@ class RegisterViewModel(private val repository: UserRepository
             try {
                 val response = repository.register(email, password)
                 _registerResult.value = Result.success(response)
-                val loginResult = response.user
                 val registerResult = response.user
 
                 val userId = registerResult?.uid ?: ""

@@ -26,6 +26,7 @@ open class UserRepository private constructor(
     }
 
     suspend fun logout() {
+        apiService.signout()
         userPreference.logout()
     }
     companion object {

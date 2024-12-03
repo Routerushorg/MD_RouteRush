@@ -35,4 +35,5 @@
     <string name="error_empty_email">email masih kosong!</string>
     <string name="error_empty_name">Nama masih Kosong!</string>
     <string name="error_existingemail">| Email Sudah Ada !</string>
+    <string name="loginResult">Login Berhasil!</string>
 </resources>

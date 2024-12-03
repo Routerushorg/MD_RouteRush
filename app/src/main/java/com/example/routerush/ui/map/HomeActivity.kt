@@ -4,8 +4,11 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.routerush.R
@@ -17,21 +20,30 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.routerush.databinding.ActivityHomeBinding
+import com.example.routerush.ui.ViewModelFactory
 import com.example.routerush.ui.login.LoginActivity
+import com.example.routerush.ui.login.LoginViewModel
+import com.example.routerush.ui.main.MainActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
+import org.w3c.dom.Text
 
 class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityHomeBinding
-
+    private val viewModel by viewModels<HomeViewModel> {
+        ViewModelFactory.getInstance(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
         binding.fabMenu.setOnClickListener {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 binding.drawerLayout.closeDrawer(GravityCompat.START) // Tutup drawer jika sudah terbuka
@@ -39,6 +51,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.drawerLayout.openDrawer(GravityCompat.START) // Buka drawer
             }
         }
+
 
         val drawerLayout = binding.drawerLayout
         val navigationView = binding.navigationView
@@ -70,15 +83,26 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         val headerView = navigationView.getHeaderView(0)
         val logoutButton = headerView.findViewById<Button>(R.id.btn_logout)
 
+        viewModel.getSession().observe(this) { user ->
+            if (!user.isLogin) {
+
+                // Arahkan ke MainActivity jika belum login
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } else {
+                findViewById<TextView>(R.id.tv_user_name).text = user.name
+                findViewById<TextView>(R.id.tv_user_email).text = user.email
+            }
+        }
         // Menangani klik tombol Logout
         logoutButton.setOnClickListener {
-            // Tindakan logout, misalnya mengarahkan ke LoginActivity
+            viewModel.logout()
             Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show()
 
-            // Mengarahkan ke LoginActivity setelah logout
-            val intent = Intent(this, LoginActivity::class.java)
+            // Mengarahkan ke MainActivity setelah logout
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
-            finish()  // Menyelesaikan MainActivity setelah logout
+            finish()  // Menyelesaikan HomeActivity setelah logout
         }
 
 

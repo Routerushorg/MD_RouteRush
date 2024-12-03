@@ -7,6 +7,7 @@ import com.example.routerush.data.Injection
 import com.example.routerush.data.UserRepository
 import com.example.routerush.data.datastore.UserPreference
 import com.example.routerush.ui.login.LoginViewModel
+import com.example.routerush.ui.map.HomeViewModel
 import com.example.routerush.ui.register.RegisterViewModel
 
 
@@ -22,6 +23,9 @@ class ViewModelFactory(private val repository: UserRepository,
             }
             modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
                 RegisterViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
+                HomeViewModel(repository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }

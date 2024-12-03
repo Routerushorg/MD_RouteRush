@@ -1,5 +1,6 @@
 package com.example.routerush.ui.login
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,15 +38,13 @@ class LoginViewModel(private val repository: UserRepository,
         _isLoading.value = true
         viewModelScope.launch {
             try {
+
                 val response = repository.login(email, password)
                 val loginResult = response.user
 
 
-
                 val userId = loginResult?.uid ?: ""
-                fetchUserName()
                 val name = fetchUserName()
-
                 val user = UserModel(
                     userId = userId,
                     name = name,
@@ -55,10 +54,8 @@ class LoginViewModel(private val repository: UserRepository,
                 saveAuth(user)
                 _loginResponse.postValue(response)
             } catch (e: HttpException) {
-                httpException(e)
-            } catch (e: Exception) {
-                generalException(e)
-            } finally {
+                _isError.postValue(e.toString() ?: "An unknown error occurred")
+            }  finally {
                 _isLoading.postValue(false)
             }
         }
@@ -67,13 +64,5 @@ class LoginViewModel(private val repository: UserRepository,
         viewModelScope.launch {
             repository.saveAuth(userModel)
         }
-    }
-    private fun httpException(e: HttpException) {
-        val jsonInString = e.response()?.errorBody()?.string()
-        val errorBody = Gson().fromJson(jsonInString, LoginAndRegisterResponse::class.java)
-        _isError.postValue(errorBody.message)
-    }
-    private fun generalException(e: Exception) {
-        _isError.postValue(e.message ?: "An unexpected error occurred")
     }
 }
