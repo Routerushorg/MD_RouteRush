@@ -1,6 +1,6 @@
 package com.example.routerush.data.remote
 
-import okhttp3.Interceptor
+import com.example.routerush.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -14,7 +14,7 @@ object ApiConfig {
             .addInterceptor(loggingInterceptor)
             .build()
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://backend-api-453046371149.asia-southeast2.run.app")
+            .baseUrl(BuildConfig.AUTH_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

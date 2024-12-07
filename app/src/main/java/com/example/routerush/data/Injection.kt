@@ -4,7 +4,6 @@ import android.content.Context
 import com.example.routerush.data.datastore.UserPreference
 import com.example.routerush.data.datastore.dataStore
 import com.example.routerush.data.remote.ApiConfig
-import kotlinx.coroutines.runBlocking
 
 object Injection {
     fun provideRepository(context: Context): UserRepository {

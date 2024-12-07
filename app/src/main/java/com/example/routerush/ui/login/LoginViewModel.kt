@@ -1,6 +1,5 @@
 package com.example.routerush.ui.login
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,7 +8,6 @@ import com.example.routerush.data.UserRepository
 import com.example.routerush.data.datastore.UserModel
 import com.example.routerush.data.datastore.UserPreference
 import com.example.routerush.data.response.LoginAndRegisterResponse
-import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import retrofit2.HttpException

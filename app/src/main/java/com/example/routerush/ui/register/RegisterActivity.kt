@@ -1,21 +1,17 @@
 package com.example.routerush.ui.register
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.routerush.R
 import com.example.routerush.databinding.ActivityRegisterBinding
 import com.example.routerush.ui.ViewModelFactory
-import com.example.routerush.ui.login.LoginViewModel
-import com.example.routerush.ui.main.MainActivity
 
 class RegisterActivity : AppCompatActivity() {
     private val viewModel by viewModels<RegisterViewModel> {

@@ -1,17 +1,12 @@
 package com.example.routerush.data.remote
 
 import com.example.routerush.data.response.LoginAndRegisterResponse
-import com.example.routerush.ui.login.LoginActivity
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
+import com.example.routerush.data.response.OptimizeRouteResponse
+import com.example.routerush.data.response.RouteRequest
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.Query
 
 
 interface ApiService {
@@ -32,4 +27,9 @@ interface ApiService {
     @POST("signout")
     suspend fun signout(): LoginAndRegisterResponse
 
+
+    @POST("optimize-route")
+    suspend fun optimizeRoute(
+        @Body requestBody: RouteRequest
+    ): OptimizeRouteResponse
 }

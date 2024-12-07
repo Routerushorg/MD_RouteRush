@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RouteRush</string>
+    <string name="app_name">Route Rush</string>
     <string name="logo">AppLogo</string>
     <string name="logo_image">RouteRushLogo</string>
     <string name="route_rush">Route Rush</string>
@@ -34,4 +34,6 @@
     <string name="error_empty_name">Nama masih Kosong!</string>
     <string name="error_existingemail">Email Sudah Ada</string>
     <string name="loginResult">Login Berhasil!</string>
+    <string name="location_number">%1$d</string>
+    <string name="recent_routes">Recent Routes</string>
 </resources>

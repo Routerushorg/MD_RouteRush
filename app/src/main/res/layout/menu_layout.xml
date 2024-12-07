@@ -36,7 +36,7 @@
 
         <!-- Tombol Logout -->
         <Button
-            android:id="@+id/btn_logout"
+            android:id="@+id/btn_log"
             android:layout_width="260dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_button"

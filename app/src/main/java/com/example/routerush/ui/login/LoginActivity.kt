@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.routerush.R
 import com.example.routerush.databinding.ActivityLoginBinding
 import com.example.routerush.ui.ViewModelFactory
-import com.example.routerush.ui.main.MainActivity
 import com.example.routerush.ui.map.HomeActivity
 
 class LoginActivity : AppCompatActivity() {

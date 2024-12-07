@@ -1,7 +1,6 @@
 package com.example.routerush.ui.map
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -16,6 +15,14 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val _isLoading = MutableLiveData<Boolean>()
 
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> get() = _error
+
+
+    private val _optimizedRoute =  MutableLiveData<List<String>>()
+    val optimizedRoute: LiveData<List<String>> get() = _optimizedRoute
+
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
     }
@@ -26,4 +33,15 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
+    fun optimizeRoute(addresses: List<String>) {
+        viewModelScope.launch {
+            try {
+                val response = repository.optimizeRoute(addresses)
+                val optimizedRoute = response.getOrNull()?.replace("Optimized route for addresses: ", "")?.split(", ") ?: emptyList()
+                _optimizedRoute.postValue(optimizedRoute)
+            } catch (e: Exception) {
+                _error.postValue("Failed to optimize route: ${e.message}")
+            }
+        }
+    }
 }

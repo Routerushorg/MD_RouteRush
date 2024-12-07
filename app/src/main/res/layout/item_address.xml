@@ -18,7 +18,7 @@
             android:id="@+id/tv_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1"
+            android:text="@string/location_number"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_gravity="center_vertical"

@@ -1,18 +1,29 @@
 package com.example.routerush.ui.map
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
+import android.util.Log
 import android.widget.Button
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.routerush.BuildConfig
 import com.example.routerush.R
-
+import com.example.routerush.data.LocationItem
+import com.example.routerush.data.response.RouteResponse
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -21,28 +32,62 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.routerush.databinding.ActivityHomeBinding
 import com.example.routerush.ui.ViewModelFactory
-import com.example.routerush.ui.login.LoginActivity
-import com.example.routerush.ui.login.LoginViewModel
 import com.example.routerush.ui.main.MainActivity
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.navigation.NavigationView
-import org.w3c.dom.Text
+import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+
 
 class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    private lateinit var locationAdapter: LocationAdapter
+
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityHomeBinding
+
+    private val markerLocations = mutableListOf<LatLng>()
+
+    private lateinit var recentRouteAdapter: RecentRouteAdapter
+
     private val viewModel by viewModels<HomeViewModel> {
         ViewModelFactory.getInstance(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        locationAdapter = LocationAdapter(mutableListOf()) { location ->
+            // Handle click: move map to location
+            moveToLocation(location)
+        }
+        binding.rvAddresses.layoutManager = LinearLayoutManager(this)
+        binding.rvAddresses.adapter = locationAdapter
+
+
+
+        binding.svSearchAddress.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (!query.isNullOrEmpty()) {
+                    searchLocation(query)
+                    binding.svSearchAddress.setQuery("", true)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
 
         binding.fabMenu.setOnClickListener {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -51,37 +96,34 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.drawerLayout.openDrawer(GravityCompat.START) // Buka drawer
             }
         }
+        recentRouteAdapter = RecentRouteAdapter(mutableListOf())
+        binding.rvRoutes.layoutManager = LinearLayoutManager(this)
+        binding.rvRoutes.adapter = recentRouteAdapter
 
-
-        val drawerLayout = binding.drawerLayout
-        val navigationView = binding.navigationView
-
-        // Menangani item click pada navigation view
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            // Mengatur item yang dipilih
-            menuItem.isChecked = true
-
-            // Menutup drawer setelah memilih item
-            drawerLayout.closeDrawer(GravityCompat.START)
-
-            // Menangani klik berdasarkan ID item
-            when (menuItem.itemId) {
-                R.id.menu_add_route -> {
-                    // Tindakan untuk item Add Route
-                    Toast.makeText(this, "Add Route clicked", Toast.LENGTH_SHORT).show()
-                    // Lakukan aksi yang sesuai, misalnya membuka Activity baru untuk menambah route
-                }
-                else -> {
-                    // Tindakan default
-                }
+        viewModel.optimizedRoute.observe(this) { route ->
+            if (!route.isNullOrEmpty()) {
+                recentRouteAdapter.updateRoutes(route)
             }
-            true
         }
 
-        // Handle Navigation Drawer
+        binding.btnOptimizeRoute.setOnClickListener {
+            val addresses = locationAdapter.getAddresses()
+            if (addresses.isNotEmpty()) {
+                viewModel.optimizeRoute(addresses)
+            } else {
+                Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        val headerView = navigationView.getHeaderView(0)
-        val logoutButton = headerView.findViewById<Button>(R.id.btn_logout)
+
+
+
+        val logoutButton = findViewById<Button>(R.id.btn_logout)
+        val addRouteButton = findViewById<Button>(R.id.btn_add_route)
+
+        addRouteButton.setOnClickListener{
+            Toast.makeText(this, "Route Added", Toast.LENGTH_SHORT).show()
+        }
 
         viewModel.getSession().observe(this) { user ->
             if (!user.isLogin) {
@@ -94,6 +136,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 findViewById<TextView>(R.id.tv_user_email).text = user.email
             }
         }
+
         // Menangani klik tombol Logout
         logoutButton.setOnClickListener {
             viewModel.logout()
@@ -109,9 +152,16 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
         BottomSheetBehavior.from(binding.sheet).apply {
             peekHeight = 100
-            this.state = BottomSheetBehavior.STATE_COLLAPSED
+            this.state = BottomSheetBehavior.STATE_HIDDEN
         }
 
+
+
+        viewModel.error.observe(this) { errorMessage ->
+            if (!errorMessage.isNullOrEmpty()) {
+                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -120,23 +170,193 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+
+    private fun moveToLocation(location: LocationItem) {
+        // Move map to clicked location
+        val latLng = LatLng(location.latitude, location.longitude)
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f)) // Zoom into the location
+    }
+
+
+    private fun searchLocation(query: String) {
+        val geocoder = Geocoder(this)
+        try {
+            val addresses = geocoder.getFromLocationName(query, 1)
+            if (addresses != null && addresses.isNotEmpty()) {
+                val address = addresses[0]
+                val location = LatLng(address.latitude, address.longitude)
+
+                // Tambahkan lokasi ke RecyclerView
+                val locationItem = LocationItem(query, address.latitude, address.longitude)
+                locationAdapter.addLocation(locationItem)
+
+                // Tambahkan marker dan pindahkan kamera
+                markerLocations.add(location)
+                val markerIndex = locationAdapter.itemCount
+                val customMarker = createNumberedMarker(this, markerIndex)
+                mMap.addMarker(
+                    MarkerOptions()
+                        .position(location)
+                        .title(query)
+                        .icon(customMarker)
+                )
+
+                if (markerLocations.isNotEmpty()) {
+                    val boundsBuilder = LatLngBounds.Builder()
+                    markerLocations.forEach { boundsBuilder.include(it) }
+
+                    val bounds = boundsBuilder.build()
+                    val padding = 150 // Padding untuk batas kamera (dalam pixel)
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                }
+
+                if (markerLocations.size > 1) {
+                   drawRoute()
+                }
+
+
+            } else {
+                Toast.makeText(this, "Location not found!", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Failed to search location: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun drawRoute() {
+        if (markerLocations.size > 1) {
+            val origin = markerLocations[0]
+            val destination = markerLocations[markerLocations.size - 1]
+            val url = getDirectionURL(origin, destination)
+
+            // Panggil coroutine untuk mendapatkan data rute
+            lifecycleScope.launch {
+                val result = getDirection(url)
+                drawPolyline(result)
+            }
+        }
+    }
+    private fun getDirectionURL(origin: LatLng, dest: LatLng): String {
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${dest.latitude},${dest.longitude}&sensor=false&mode=driving&key=${BuildConfig.MAPS_API_KEY}"
+    }
+    private suspend fun getDirection(url: String): List<LatLng> {
+        return withContext(Dispatchers.IO) {
+            val client = OkHttpClient()
+            val request = Request.Builder().url(url).build()
+            val response = client.newCall(request).execute()
+            val data = response.body?.string() ?: ""
+            val result = ArrayList<LatLng>()
+
+            Log.d("API Response", data)
+            try {
+                val respObj = Gson().fromJson(data, RouteResponse::class.java)
+                val path = ArrayList<LatLng>()
+                for (i in 0 until respObj.routes[0].legs[0].steps.size) {
+                    path.addAll(decodePolyline(respObj.routes[0].legs[0].steps[i].polyline.points))
+                }
+                Log.d("Decoded Path", path.toString())
+                result.addAll(path)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            result
+        }
+    }
+
+    private fun drawPolyline(path: List<LatLng>) {
+        val color = ContextCompat.getColor(this, R.color.lightblue)
+        val lineOption = PolylineOptions().apply {
+            width(20f)
+            color(color)
+            geodesic(true)
+        }
+
+        lineOption.addAll(path)
+        mMap.addPolyline(lineOption)
+    }
+
+    fun decodePolyline(encoded: String): List<LatLng> {
+        val poly = ArrayList<LatLng>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+
+            val latLng = LatLng(lat.toDouble() / 1E5, lng.toDouble() / 1E5)
+            poly.add(latLng)
+        }
+
+        return poly
+    }
+
+    private fun createNumberedMarker(context: Context, number: Int): BitmapDescriptor {
+        val markerDrawable = ContextCompat.getDrawable(context, R.drawable.ic_default_marker)
+        val width = markerDrawable?.intrinsicWidth ?: 0
+        val height = markerDrawable?.intrinsicHeight ?: 0
+
+        // Buat bitmap dengan ukuran marker
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        // Gambar marker ke dalam canvas
+        markerDrawable?.setBounds(0, 0, width, height)
+        markerDrawable?.draw(canvas)
+
+        // Tambahkan nomor ke marker
+        val paint = Paint().apply {
+            color = ContextCompat.getColor(context, R.color.darkblue)
+            textSize = width /2f // Ukuran teks, sesuaikan dengan ukuran marker
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.mulish_extra_bold), Typeface.BOLD)
+        }
+
+        // Hitung posisi teks agar berada di tengah marker
+        val xPos = width / 2f
+        val yPos = height / 2f - (paint.descent() + paint.ascent()) / 2f - height / 8f
+
+        // Gambar nomor di atas marker
+        canvas.drawText(number.toString(), xPos, yPos, paint)
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-    }
+        val indonesiaBounds = LatLngBounds(
+            LatLng(-11.0, 95.0),
+            LatLng(6.0, 141.0)
+        )
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(indonesiaBounds, 100))
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(-5.0, 115.0), 5f))
+    }
 
 }

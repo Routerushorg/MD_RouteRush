@@ -1,10 +1,11 @@
 package com.example.routerush.data
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import com.example.routerush.data.datastore.UserModel
 import com.example.routerush.data.datastore.UserPreference
 import com.example.routerush.data.remote.ApiService
 import com.example.routerush.data.response.LoginAndRegisterResponse
+import com.example.routerush.data.response.RouteRequest
 import kotlinx.coroutines.flow.Flow
 
 open class UserRepository private constructor(
@@ -12,6 +13,8 @@ open class UserRepository private constructor(
     private val userPreference: UserPreference
 
 ) {
+
+
     suspend fun register(email: String, password: String): LoginAndRegisterResponse {
         return apiService.register(email, password)
     }
@@ -28,6 +31,17 @@ open class UserRepository private constructor(
     suspend fun logout() {
         apiService.signout()
         userPreference.logout()
+    }
+
+    suspend fun optimizeRoute(addresses: List<String>): Result<String> {
+        return try {
+            val requestBody = RouteRequest(addresses)
+            Log.d("RequestBody", requestBody.toString())
+            val response = apiService.optimizeRoute(requestBody)
+            Result.success(response.optimizedRoute)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
     companion object {
         @Volatile
