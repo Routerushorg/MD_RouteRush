@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <!-- Warna tombol -->
-    <solid android:color="#6200EE" />
+    <solid android:color="#A8E8F9" />
 
     <!-- Radius sudut tombol -->
     <corners android:radius="10dp" />
@@ -16,7 +16,4 @@
         android:bottom="8dp" />
 
     <!-- Border tombol (opsional) -->
-    <stroke
-        android:width="1dp"
-        android:color="#3700B3" /> <!-- Ganti warna sesuai kebutuhan -->
 </shape>

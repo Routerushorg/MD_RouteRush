@@ -29,7 +29,6 @@ class LocationAdapter(private val locations: MutableList<LocationItem>,
         holder.numberTextView.text =  holder.itemView.context.getString(R.string.location_number, position + 1)
         holder.nameTextView.text = location.name
         holder.itemView.setOnClickListener {
-            // Notify the listener when an item is clicked
             onLocationClickListener(location)
         }
     }
@@ -45,6 +44,12 @@ class LocationAdapter(private val locations: MutableList<LocationItem>,
             // Location already exists, no need to add again
             Log.d("LocationAdapter", "Location already exists: ${location.name}")
         }
+    }
+
+    fun clearLocations() {
+        val size = locations.size
+        locations.clear()
+        notifyItemRangeRemoved(0, size)
     }
 
     fun getAddresses(): List<String> {

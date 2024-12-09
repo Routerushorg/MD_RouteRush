@@ -17,6 +17,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
 
     suspend fun saveSession(user: UserModel) {
         dataStore.edit { preferences ->
+            preferences[NAME_KEY] = user.name
             preferences[EMAIL_KEY] = user.email
             preferences[IS_LOGIN_KEY] = true
         }

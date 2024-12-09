@@ -10,6 +10,7 @@ import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.TextView
@@ -109,14 +110,32 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.btnOptimizeRoute.setOnClickListener {
             val addresses = locationAdapter.getAddresses()
             if (addresses.isNotEmpty()) {
+                binding.llSv.visibility= View.GONE
+                binding.rvAddresses.visibility = View.GONE
+                binding.btnOptimizeRoute.visibility = View.GONE
+                binding.llTimeAndFuel.visibility = View.VISIBLE
+                binding.rvOptimized.visibility = View.VISIBLE
+                binding.btnNavigateRoute.visibility = View.VISIBLE
+
                 viewModel.optimizeRoute(addresses)
             } else {
                 Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
             }
         }
 
+        binding.btnBack.setOnClickListener {
+            binding.llTimeAndFuel.visibility = View.GONE
+            binding.rvOptimized.visibility = View.GONE
+            binding.btnNavigateRoute.visibility = View.GONE
+            binding.llSv.visibility= View.VISIBLE
+            binding.rvAddresses.visibility = View.VISIBLE
+            binding.btnOptimizeRoute.visibility = View.VISIBLE
+        }
 
 
+        binding.btnErase.setOnClickListener{
+            clearAllAddresses()
+        }
 
         val logoutButton = findViewById<Button>(R.id.btn_logout)
         val addRouteButton = findViewById<Button>(R.id.btn_add_route)
@@ -169,7 +188,18 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
+    private fun clearAllAddresses() {
+        // Clear adapter data
+        locationAdapter.clearLocations()
 
+        // Clear markers on the map
+        mMap.clear()
+
+        // Clear stored marker locations
+        markerLocations.clear()
+
+        Toast.makeText(this, "All addresses cleared!", Toast.LENGTH_SHORT).show()
+    }
 
     private fun moveToLocation(location: LocationItem) {
         // Move map to clicked location
