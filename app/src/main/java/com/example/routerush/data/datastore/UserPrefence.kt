@@ -27,7 +27,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         return dataStore.data.map { preferences ->
             UserModel(
                 userId = preferences[USERID_KEY] ?: "",
-                name = preferences[NAME_KEY] ?: "User",
+                name = preferences[NAME_KEY] ?: "Charlie",
                 email = preferences[EMAIL_KEY] ?: "",
                 isLogin = preferences[IS_LOGIN_KEY] ?: false
             )

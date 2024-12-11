@@ -104,7 +104,7 @@
                     android:contentDescription="@string/fuel_icon_desc" />
 
                 <TextView
-                    android:id="@+id/tv_fuel"
+                    android:id="@+id/tv_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/distance"

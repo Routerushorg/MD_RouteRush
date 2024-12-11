@@ -23,6 +23,9 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
     private val _optimizedRoute =  MutableLiveData<List<String>>()
     val optimizedRoute: LiveData<List<String>> get() = _optimizedRoute
 
+    private val _optimizedRouteToAddresses = MutableLiveData<List<String>>()
+    val optimizedRouteToAddresses: LiveData<List<String>> get() = _optimizedRouteToAddresses
+
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
     }
@@ -30,6 +33,17 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
     fun logout() {
         viewModelScope.launch {
             repository.logout()
+        }
+    }
+
+    fun optimizeRouteToAddresses(addresses: List<String>) {
+        viewModelScope.launch {
+            val result = repository.optimizeRouteToAddresses(addresses)
+            result.onSuccess {
+                _optimizedRouteToAddresses.value = it
+            }.onFailure { e ->
+                _error.value = e.message
+            }
         }
     }
 

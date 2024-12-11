@@ -75,7 +75,8 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.rvAddresses.layoutManager = LinearLayoutManager(this)
         binding.rvAddresses.adapter = locationAdapter
 
-
+        binding.tvTime
+        binding.tvDistance
 
         binding.svSearchAddress.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -107,27 +108,57 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 recentRouteAdapter.updateRoutes(route)
             }
         }
+        viewModel.optimizedRouteToAddresses.observe(this) { route ->
+            if (!route.isNullOrEmpty()) {
 
+                mMap.clear()
+                markerLocations.clear()
+
+
+                val geocoder = Geocoder(this)
+                val newLocations = mutableListOf<LatLng>()
+                route.forEach { address ->
+                    try {
+                        val geocodeResult = geocoder.getFromLocationName(address, 1)
+                        if (geocodeResult != null && geocodeResult.isNotEmpty()) {
+                            val location = LatLng(geocodeResult[0].latitude, geocodeResult[0].longitude)
+                            newLocations.add(location)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                markerLocations.addAll(newLocations)
+
+
+                newLocations.forEachIndexed { index, location ->
+                    val customMarker = createNumberedMarker(this, index + 1)
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(location)
+                            .title(route[index])
+                            .icon(customMarker)
+                    )
+                }
+
+                if (newLocations.size > 1) {
+                    drawOptimizedRoute(newLocations)
+                }
+                updateOptimizedRecyclerView(route)
+            }
+        }
         binding.btnOptimizeRoute.setOnClickListener {
             val addresses = locationAdapter.getAddresses()
-            val locations = locationAdapter.getLocations()
 
             if (addresses.isNotEmpty()) {
-
+                viewModel.optimizeRouteToAddresses(addresses)
                 binding.llSv.visibility= View.GONE
                 binding.rvAddresses.visibility = View.GONE
                 binding.btnOptimizeRoute.visibility = View.GONE
                 binding.llTimeAndFuel.visibility = View.VISIBLE
                 binding.rvOptimized.visibility = View.VISIBLE
                 binding.btnNavigateRoute.visibility = View.VISIBLE
-                //temporary
-                val optimizedAdapter = LocationAdapter(locations.toMutableList()) { location ->
-                    moveToLocation(location)
-                }
-                binding.rvOptimized.layoutManager = LinearLayoutManager(this)
-                binding.rvOptimized.adapter = optimizedAdapter
-                //
-
                 viewModel.optimizeRoute(addresses)
             } else {
                 Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
@@ -206,6 +237,46 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+    }
+    private fun drawOptimizedRoute(locations: List<LatLng>) {
+        lifecycleScope.launch {
+            try {
+                for (i in 0 until locations.size - 1) {
+                    val origin = locations[i]
+                    val destination = locations[i + 1]
+                    val waypoints = locations.subList(1, locations.size - 1)
+                    val url = getDirectionURL(origin, destination, waypoints)
+
+                    val (path, info) = getDirection(url)
+                    val (distance, duration) = info
+                    drawPolyline(path)
+                    binding.tvDistance.text = (distance)
+                    binding.tvTime.text = (duration)
+                }
+
+                // Zoom ke semua marker
+                if (locations.isNotEmpty()) {
+                    val boundsBuilder = LatLngBounds.Builder()
+                    locations.forEach { boundsBuilder.include(it) }
+                    val bounds = boundsBuilder.build()
+                    val padding = 150
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this@HomeActivity, "Failed to draw route: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    private fun updateOptimizedRecyclerView(route: List<String>) {
+        val optimizedLocations = route.map { address ->
+            LocationItem(address, 0.0, 0.0)
+        }
+        val optimizedAdapter = LocationAdapter(optimizedLocations.toMutableList()) { location ->
+            moveToLocation(location)
+        }
+        binding.rvOptimized.layoutManager = LinearLayoutManager(this)
+        binding.rvOptimized.adapter = optimizedAdapter
     }
 
     private fun navigateThroughLocations(locations: List<LatLng>) {
@@ -305,43 +376,81 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         if (markerLocations.size > 1) {
             val origin = markerLocations[0]
             val destination = markerLocations[markerLocations.size - 1]
-            val url = getDirectionURL(origin, destination)
+            val waypoints = markerLocations.subList(1, markerLocations.size - 1)
+            val url = getDirectionURL(origin, destination,waypoints)
 
             // Panggil coroutine untuk mendapatkan data rute
             lifecycleScope.launch {
-                val result = getDirection(url)
-                drawPolyline(result)
+                val (path, info) = getDirection(url)
+                val (distance, duration) = info
+                drawPolyline(path)
+                binding.tvDistance.text = (distance)
+                binding.tvTime.text = (duration)
             }
         }
     }
-    private fun getDirectionURL(origin: LatLng, dest: LatLng): String {
-        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${dest.latitude},${dest.longitude}&sensor=false&mode=driving&key=${BuildConfig.MAPS_API_KEY}"
+    private fun getDirectionURL(origin: LatLng, dest: LatLng, waypoints: List<LatLng>? = null): String {
+        val waypointsParam = if (waypoints != null && waypoints.isNotEmpty()) {
+            waypoints.joinToString("|") { "${it.latitude},${it.longitude}" }
+        } else {
+            ""
+        }
+        return "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}" +
+                "&destination=${dest.latitude},${dest.longitude}" + "&waypoints=$waypointsParam" +
+                        "&sensor=false&mode=driving&key=${BuildConfig.MAPS_API_KEY}"
     }
-    private suspend fun getDirection(url: String): List<LatLng> {
+
+    private suspend fun getDirection(url: String): Pair<List<LatLng>, Pair<String, String>> {
         return withContext(Dispatchers.IO) {
             val client = OkHttpClient()
             val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()
             val data = response.body?.string() ?: ""
             val result = ArrayList<LatLng>()
+            var distance = 0
+            var duration = 0
 
             Log.d("API Response", data)
             try {
                 val respObj = Gson().fromJson(data, RouteResponse::class.java)
-                val path = ArrayList<LatLng>()
-                for (i in 0 until respObj.routes[0].legs[0].steps.size) {
-                    path.addAll(decodePolyline(respObj.routes[0].legs[0].steps[i].polyline.points))
+                val legs = respObj.routes[0].legs
+
+                // Ambil jarak dan waktu
+                for (leg in legs) {
+                    distance += leg.distance.value
+                    duration += leg.duration.value
+                    for (step in leg.steps) {
+                        result.addAll(decodePolyline(step.polyline.points))
+                    }
                 }
-                Log.d("Decoded Path", path.toString())
-                result.addAll(path)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
-            result
+            val distanceText = formatDistance(distance)
+            val durationText = formatDuration(duration)
+            Pair(result, Pair(distanceText, durationText))
+        }
+    }
+    private fun formatDistance(distanceInMeters: Int): String {
+        return if (distanceInMeters >= 1000) {
+            String.format("%.1f km", distanceInMeters / 1000.0)
+        } else {
+            // Jarak dalam meter jika kurang dari 1000 meter
+            "$distanceInMeters m"
         }
     }
 
+    private fun formatDuration(durationInSeconds: Int): String {
+        val hours = durationInSeconds / 3600
+        val minutes = (durationInSeconds % 3600) / 60
+        val seconds = durationInSeconds % 60
+
+        return if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+    }
     private fun drawPolyline(path: List<LatLng>) {
         val color = ContextCompat.getColor(this, R.color.lightblue)
         val lineOption = PolylineOptions().apply {
