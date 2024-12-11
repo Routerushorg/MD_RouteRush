@@ -135,7 +135,18 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
+        binding.btnBack.setOnClickListener {
+            binding.llSv.visibility= View.VISIBLE
+            binding.rvAddresses.visibility = View.VISIBLE
+            binding.btnOptimizeRoute.visibility = View.VISIBLE
+            binding.llTimeAndFuel.visibility = View.GONE
+            binding.rvOptimized.visibility = View.GONE
+            binding.btnNavigateRoute.visibility = View.GONE
+        }
 
+        binding.btnErase.setOnClickListener{
+            clearAllAddresses()
+        }
 
         binding.btnNavigateRoute.setOnClickListener {
             if (markerLocations.isNotEmpty()) {
