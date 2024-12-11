@@ -235,6 +235,8 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.tvTime.visibility = if (isLoading) View.GONE else View.VISIBLE
             binding.tvDistance.visibility = if (isLoading) View.GONE else View.VISIBLE
+            binding.ivTimeIcon.visibility = if (isLoading) View.GONE else View.VISIBLE
+            binding.ivDistanceIcon.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
