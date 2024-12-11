@@ -1,6 +1,5 @@
 package com.example.routerush.data.remote
 
-import com.example.routerush.data.response.OptimizeRouteResponse
 import com.example.routerush.data.response.OptimizedResponse
 import com.example.routerush.data.response.RouteRequest
 import retrofit2.Response

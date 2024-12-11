@@ -1,10 +1,8 @@
 package com.example.routerush.data
 
-import android.util.Log
 import com.example.routerush.data.datastore.UserModel
 import com.example.routerush.data.datastore.UserPreference
 import com.example.routerush.data.remote.ApiService
-import com.example.routerush.data.remote.MlApiConfig
 import com.example.routerush.data.remote.MlApiService
 import com.example.routerush.data.response.LoginAndRegisterResponse
 import com.example.routerush.data.response.RouteRequest
@@ -54,7 +52,7 @@ open class UserRepository private constructor(
     suspend fun optimizeRoute(addresses: List<String>): Result<String> {
         return try {
             val requestBody = RouteRequest(addresses)
-            Log.d("RequestBody", requestBody.toString())
+            // Log.d("RequestBody", requestBody.toString())
             val response = apiService.optimizeRoute(requestBody)
             Result.success(response.optimizedRoute)
         } catch (e: Exception) {
