@@ -113,6 +113,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             val locations = locationAdapter.getLocations()
 
             if (addresses.isNotEmpty()) {
+
                 binding.llSv.visibility= View.GONE
                 binding.rvAddresses.visibility = View.GONE
                 binding.btnOptimizeRoute.visibility = View.GONE
@@ -126,25 +127,15 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.rvOptimized.layoutManager = LinearLayoutManager(this)
                 binding.rvOptimized.adapter = optimizedAdapter
                 //
+
                 viewModel.optimizeRoute(addresses)
             } else {
                 Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.btnBack.setOnClickListener {
-            binding.llTimeAndFuel.visibility = View.GONE
-            binding.rvOptimized.visibility = View.GONE
-            binding.btnNavigateRoute.visibility = View.GONE
-            binding.llSv.visibility= View.VISIBLE
-            binding.rvAddresses.visibility = View.VISIBLE
-            binding.btnOptimizeRoute.visibility = View.VISIBLE
-        }
 
 
-        binding.btnErase.setOnClickListener{
-            clearAllAddresses()
-        }
 
         binding.btnNavigateRoute.setOnClickListener {
             if (markerLocations.isNotEmpty()) {
@@ -205,6 +196,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
+
     private fun navigateThroughLocations(locations: List<LatLng>) {
         if (locations.size < 2) {
             Toast.makeText(this, "At least two locations are required for navigation!", Toast.LENGTH_SHORT).show()
@@ -242,6 +234,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         markerLocations.clear()
         Toast.makeText(this, "All addresses cleared!", Toast.LENGTH_SHORT).show()
     }
+
 
     private fun moveToLocation(location: LocationItem) {
         // Move map to clicked location
