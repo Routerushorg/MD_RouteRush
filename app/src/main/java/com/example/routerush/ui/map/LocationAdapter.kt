@@ -55,4 +55,7 @@ class LocationAdapter(private val locations: MutableList<LocationItem>,
     fun getAddresses(): List<String> {
         return locations.map { it.name }
     }
+    fun getLocations(): List<LocationItem> {
+        return locations
+    }
 }

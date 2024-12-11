@@ -6,6 +6,7 @@ import android.util.Patterns
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -64,22 +65,22 @@ class RegisterActivity : AppCompatActivity() {
             // Pengecekan untuk validitas input
             when {
                 name.isBlank() && email.isBlank() && password.isBlank() -> {
-                    showErrorDialog(getString(R.string.error_empty))
+                    Toast.makeText(this,getString(R.string.error_empty), Toast.LENGTH_SHORT).show()
                 }
                 name.isBlank() -> {
-                    showErrorDialog(getString(R.string.error_empty_name))
+                    Toast.makeText(this,getString(R.string.error_empty_name), Toast.LENGTH_SHORT).show()
                 }
                 email.isBlank() -> {
-                    showErrorDialog(getString(R.string.error_empty_email))
+                    Toast.makeText(this,getString(R.string.error_empty_email), Toast.LENGTH_SHORT).show()
                 }
                 password.isBlank() -> {
-                    showErrorDialog(getString(R.string.error_empty_password))
+                    Toast.makeText(this,getString(R.string.error_empty_password), Toast.LENGTH_SHORT).show()
                 }
                 password.length < 8 -> {
-                    showErrorDialog(getString(R.string.error_short_password))
+                    Toast.makeText(this,getString(R.string.error_short_password), Toast.LENGTH_SHORT).show()
                 }
                 !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                    showErrorDialog(getString(R.string.error_invalid_email))
+                    Toast.makeText(this,getString(R.string.error_invalid_email), Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     // Semua validasi berhasil, lanjutkan dengan registrasi

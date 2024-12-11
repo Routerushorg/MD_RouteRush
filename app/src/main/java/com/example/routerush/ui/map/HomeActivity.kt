@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.location.Geocoder
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -109,6 +110,8 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding.btnOptimizeRoute.setOnClickListener {
             val addresses = locationAdapter.getAddresses()
+            val locations = locationAdapter.getLocations()
+
             if (addresses.isNotEmpty()) {
                 binding.llSv.visibility= View.GONE
                 binding.rvAddresses.visibility = View.GONE
@@ -116,7 +119,13 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.llTimeAndFuel.visibility = View.VISIBLE
                 binding.rvOptimized.visibility = View.VISIBLE
                 binding.btnNavigateRoute.visibility = View.VISIBLE
-
+                //temporary
+                val optimizedAdapter = LocationAdapter(locations.toMutableList()) { location ->
+                    moveToLocation(location)
+                }
+                binding.rvOptimized.layoutManager = LinearLayoutManager(this)
+                binding.rvOptimized.adapter = optimizedAdapter
+                //
                 viewModel.optimizeRoute(addresses)
             } else {
                 Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
@@ -135,6 +144,14 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding.btnErase.setOnClickListener{
             clearAllAddresses()
+        }
+
+        binding.btnNavigateRoute.setOnClickListener {
+            if (markerLocations.isNotEmpty()) {
+                navigateThroughLocations(markerLocations)
+            } else {
+                Toast.makeText(this, "No locations to navigate!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         val logoutButton = findViewById<Button>(R.id.btn_logout)
@@ -188,16 +205,40 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
+
+    private fun navigateToLocation(location: LatLng) {
+        val uri = Uri.parse("google.navigation:q=${location.latitude},${location.longitude}")
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Google Maps is not installed!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun navigateThroughLocations(locations: List<LatLng>) {
+        var currentIndex = 0
+
+        fun navigateToNext() {
+            if (currentIndex < locations.size) {
+                val location = locations[currentIndex]
+                currentIndex++
+                navigateToLocation(location)
+                Toast.makeText(this, "Navigating to location $currentIndex of ${locations.size}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Navigation completed!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        navigateToNext()
+    }
+
     private fun clearAllAddresses() {
-        // Clear adapter data
         locationAdapter.clearLocations()
-
-        // Clear markers on the map
         mMap.clear()
-
-        // Clear stored marker locations
         markerLocations.clear()
-
         Toast.makeText(this, "All addresses cleared!", Toast.LENGTH_SHORT).show()
     }
 
@@ -374,7 +415,6 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
