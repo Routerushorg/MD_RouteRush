@@ -14,7 +14,7 @@ object MlApiConfig {
             .addInterceptor(loggingInterceptor)
             .build()
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://backend-ml-453046371149.us-central1.run.app/")
+            .baseUrl(BuildConfig.ML_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()

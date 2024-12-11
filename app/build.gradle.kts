@@ -26,6 +26,7 @@ android {
         buildConfigField("String", "MAPS_API_KEY", "\"${properties.getProperty("MAPS_API_KEY")}\"")
         buildConfigField("String", "MAPS_BASE_URL", "\"${properties.getProperty("MAPS_BASE_URL")}\"")
         buildConfigField("String", "AUTH_BASE_URL", "\"${properties.getProperty("DATABASE_BASE_URL")}\"")
+        buildConfigField("String", "ML_BASE_URL", "\"${properties.getProperty("ML_BASE_URL")}\"")
     }
 
     buildTypes {
@@ -35,6 +36,7 @@ android {
             buildConfigField("String", "MAPS_API_KEY", "\"${properties.getProperty("MAPS_API_KEY")}\"")
             buildConfigField("String", "MAPS_BASE_URL", "\"${properties.getProperty("MAPS_BASE_URL")}\"")
             buildConfigField("String", "AUTH_BASE_URL", "\"${properties.getProperty("DATABASE_BASE_URL")}\"")
+            buildConfigField("String", "ML_BASE_URL", "\"${properties.getProperty("ML_BASE_URL")}\"")
         }
         release {
             val properties = Properties()
@@ -42,6 +44,7 @@ android {
             buildConfigField("String", "MAPS_API_KEY", "\"${properties.getProperty("MAPS_API_KEY")}\"")
             buildConfigField("String", "MAPS_BASE_URL", "\"${properties.getProperty("MAPS_BASE_URL")}\"")
             buildConfigField("String", "AUTH_BASE_URL", "\"${properties.getProperty("DATABASE_BASE_URL")}\"")
+            buildConfigField("String", "ML_BASE_URL", "\"${properties.getProperty("ML_BASE_URL")}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
