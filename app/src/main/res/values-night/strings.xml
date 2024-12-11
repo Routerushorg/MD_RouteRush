@@ -41,4 +41,5 @@
     <string name="btn_navigate">Navigate</string>
     <string name="time_logo">icon time</string>
     <string name="fuel_icon_desc">fuel icon</string>
+    <string name="distance">20 KM</string>
 </resources>

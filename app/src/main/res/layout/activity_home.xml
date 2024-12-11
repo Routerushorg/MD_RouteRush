@@ -100,14 +100,14 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="8dp"
-                    android:src="@drawable/ic_fuel"
+                    android:src="@drawable/distance_car"
                     android:contentDescription="@string/fuel_icon_desc" />
 
                 <TextView
                     android:id="@+id/tv_fuel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/fuel_consumption"
+                    android:text="@string/distance"
                     android:textSize="20sp"
                     android:textStyle="bold" />
             </LinearLayout>

@@ -205,34 +205,35 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
+    private fun navigateThroughLocations(locations: List<LatLng>) {
+        if (locations.size < 2) {
+            Toast.makeText(this, "At least two locations are required for navigation!", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-    private fun navigateToLocation(location: LatLng) {
-        val uri = Uri.parse("google.navigation:q=${location.latitude},${location.longitude}")
+        val origin = locations.first() // First location as the start
+        val destination = locations.last() // Last location as the destination
+        val waypoints = locations.subList(1, locations.size - 1) // Intermediate stops (excluding origin and destination)
+
+        // Construct the waypoints parameter
+        val waypointString = waypoints.joinToString("|") { "${it.latitude},${it.longitude}" }
+
+        val uri = Uri.parse(
+            "https://www.google.com/maps/dir/?api=1" +
+                    "&origin=${origin.latitude},${origin.longitude}" +
+                    "&destination=${destination.latitude},${destination.longitude}" +
+                    if (waypoints.isNotEmpty()) "&waypoints=$waypointString" else ""
+        )
+        Log.d("GoogleMapsURI", uri.toString())
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             setPackage("com.google.android.apps.maps")
         }
+
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
             Toast.makeText(this, "Google Maps is not installed!", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun navigateThroughLocations(locations: List<LatLng>) {
-        var currentIndex = 0
-
-        fun navigateToNext() {
-            if (currentIndex < locations.size) {
-                val location = locations[currentIndex]
-                currentIndex++
-                navigateToLocation(location)
-                Toast.makeText(this, "Navigating to location $currentIndex of ${locations.size}", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Navigation completed!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        navigateToNext()
     }
 
     private fun clearAllAddresses() {
