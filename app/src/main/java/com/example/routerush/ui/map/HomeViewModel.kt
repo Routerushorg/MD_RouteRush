@@ -14,6 +14,7 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
 
 
     private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
 
 
     private val _error = MutableLiveData<String>()
@@ -38,12 +39,14 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun optimizeRouteToAddresses(addresses: List<String>) {
         viewModelScope.launch {
+            _isLoading.value = true
             val result = repository.optimizeRouteToAddresses(addresses)
             result.onSuccess {
                 _optimizedRouteToAddresses.value = it
             }.onFailure { e ->
                 _error.value = e.message
             }
+            _isLoading.value = false
         }
     }
 

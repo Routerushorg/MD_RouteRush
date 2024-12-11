@@ -44,4 +44,7 @@ class RecentRouteAdapter(private val routes: MutableList<String>) :
             return oldItem == newItem
         }
     }
+    fun getRoutes(): List<String> {
+        return routes
+    }
 }

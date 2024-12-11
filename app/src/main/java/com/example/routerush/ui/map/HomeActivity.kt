@@ -75,8 +75,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.rvAddresses.layoutManager = LinearLayoutManager(this)
         binding.rvAddresses.adapter = locationAdapter
 
-        binding.tvTime
-        binding.tvDistance
+
 
         binding.svSearchAddress.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -191,6 +190,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         val addRouteButton = findViewById<Button>(R.id.btn_add_route)
 
         addRouteButton.setOnClickListener{
+            addRoutesToAddresses()
             Toast.makeText(this, "Route Added", Toast.LENGTH_SHORT).show()
         }
 
@@ -231,12 +231,58 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
             }
         }
-
+        viewModel.isLoading.observe(this)  { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.tvTime.visibility = if (isLoading) View.GONE else View.VISIBLE
+            binding.tvDistance.visibility = if (isLoading) View.GONE else View.VISIBLE
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+    }
+
+    private fun addRoutesToAddresses() {
+        val recentRoutes = recentRouteAdapter.getRoutes()
+        recentRoutes.forEach { route ->
+            // Convert route to LocationItem
+            val geocoder = Geocoder(this)
+            try {
+                val geocodeResult = geocoder.getFromLocationName(route, 1)
+                if (geocodeResult != null && geocodeResult.isNotEmpty()) {
+                    val location = LatLng(geocodeResult[0].latitude, geocodeResult[0].longitude)
+                    val locationItem = LocationItem(route, location.latitude, location.longitude)
+
+                    // Add to rvAddresses
+                    locationAdapter.addLocation(locationItem)
+                    markerLocations.add(location)
+
+                    // Add marker on the map
+                    val customMarker = createNumberedMarker(this, locationAdapter.itemCount)
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(location)
+                            .title(route)
+                            .icon(customMarker)
+                    )
+                    if (markerLocations.size > 1) {
+                        drawRoute()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        // Update map view to include new markers
+        if (markerLocations.isNotEmpty()) {
+            val boundsBuilder = LatLngBounds.Builder()
+            markerLocations.forEach { boundsBuilder.include(it) }
+            val bounds = boundsBuilder.build()
+            val padding = 150
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+        }
     }
     private fun drawOptimizedRoute(locations: List<LatLng>) {
         lifecycleScope.launch {
