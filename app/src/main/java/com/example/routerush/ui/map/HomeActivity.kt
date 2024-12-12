@@ -244,6 +244,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.tvDistance.visibility = if (isLoading) View.GONE else View.VISIBLE
             binding.ivTimeIcon.visibility = if (isLoading) View.GONE else View.VISIBLE
             binding.ivDistanceIcon.visibility = if (isLoading) View.GONE else View.VISIBLE
+            binding.rvOptimized.visibility = if (isLoading) View.GONE else View.VISIBLE
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -454,7 +455,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         return "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}" +
                 "&destination=${dest.latitude},${dest.longitude}" + "&waypoints=$waypointsParam" +
-                        "&sensor=false&mode=driving&key=${BuildConfig.MAPS_API_KEY}"
+                "&sensor=false&mode=driving&key=${BuildConfig.MAPS_API_KEY}"
     }
 
     private suspend fun getDirection(url: String): Pair<List<LatLng>, Pair<String, String>> {
