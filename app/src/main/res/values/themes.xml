@@ -3,6 +3,7 @@
     <style name="Base.Theme.RouteRush" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/lightblue</item>
         <item name="colorOnPrimary">@color/darkblue</item>
+
     </style>
 
     <style name="Theme.RouteRush" parent="Base.Theme.RouteRush" />

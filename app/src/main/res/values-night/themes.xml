@@ -4,6 +4,7 @@
         <!-- Customize your dark theme here. -->
         <item name="colorPrimary">@color/darkblue</item>
         <item name="colorOnPrimary">@color/lightblue</item>
+
     </style>
 
     <style name="ShapeAppearance.Material3.Fab.Circle" parent="ShapeAppearance.Material3.SmallComponent">

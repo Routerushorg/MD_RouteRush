@@ -54,6 +54,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityHomeBinding
+    private lateinit var optimizedAdapter: LocationAdapter
 
     private val markerLocations = mutableListOf<LatLng>()
 
@@ -69,13 +70,16 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         locationAdapter = LocationAdapter(mutableListOf()) { location ->
-            // Handle click: move map to location
             moveToLocation(location)
         }
         binding.rvAddresses.layoutManager = LinearLayoutManager(this)
         binding.rvAddresses.adapter = locationAdapter
 
-
+        optimizedAdapter = LocationAdapter(mutableListOf()) { location ->
+            moveToLocation(location)
+        }
+        binding.rvOptimized.layoutManager = LinearLayoutManager(this)
+        binding.rvOptimized.adapter = optimizedAdapter
 
         binding.svSearchAddress.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -98,17 +102,22 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.drawerLayout.openDrawer(GravityCompat.START) // Buka drawer
             }
         }
-        recentRouteAdapter = RecentRouteAdapter(mutableListOf())
+
+        recentRouteAdapter = RecentRouteAdapter()
         binding.rvRoutes.layoutManager = LinearLayoutManager(this)
         binding.rvRoutes.adapter = recentRouteAdapter
 
-        viewModel.optimizedRoute.observe(this) { route ->
+        viewModel.addressHistory.observe(this) { route ->
             if (!route.isNullOrEmpty()) {
                 recentRouteAdapter.updateRoutes(route)
             }
         }
-        viewModel.optimizedRouteToAddresses.observe(this) { route ->
+        viewModel.fetchAddressHistory()
+
+        viewModel.optimizedRoute.observe(this) { route ->
             if (!route.isNullOrEmpty()) {
+                updateOptimizedRecyclerView(route)
+                Log.d("OptimizedRoute", "Route data: $route")
 
                 mMap.clear()
                 markerLocations.clear()
@@ -144,21 +153,22 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (newLocations.size > 1) {
                     drawOptimizedRoute(newLocations)
                 }
-                updateOptimizedRecyclerView(route)
+
             }
         }
         binding.btnOptimizeRoute.setOnClickListener {
             val addresses = locationAdapter.getAddresses()
-
+            viewModel.fetchAddressHistory()
+            updateOptimizedRecyclerView(addresses)
             if (addresses.isNotEmpty()) {
-                viewModel.optimizeRouteToAddresses(addresses)
+                viewModel.optimizeRoute(addresses)
                 binding.llSv.visibility= View.GONE
                 binding.rvAddresses.visibility = View.GONE
                 binding.btnOptimizeRoute.visibility = View.GONE
                 binding.llTimeAndFuel.visibility = View.VISIBLE
                 binding.rvOptimized.visibility = View.VISIBLE
                 binding.btnNavigateRoute.visibility = View.VISIBLE
-                viewModel.optimizeRoute(addresses)
+
             } else {
                 Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
             }
@@ -302,7 +312,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                     binding.tvTime.text = (duration)
                 }
 
-                // Zoom ke semua marker
+
                 if (locations.isNotEmpty()) {
                     val boundsBuilder = LatLngBounds.Builder()
                     locations.forEach { boundsBuilder.include(it) }
@@ -320,11 +330,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         val optimizedLocations = route.map { address ->
             LocationItem(address, 0.0, 0.0)
         }
-        val optimizedAdapter = LocationAdapter(optimizedLocations.toMutableList()) { location ->
-            moveToLocation(location)
-        }
-        binding.rvOptimized.layoutManager = LinearLayoutManager(this)
-        binding.rvOptimized.adapter = optimizedAdapter
+        optimizedAdapter.updateData(optimizedLocations) // Buat fungsi di adapter
     }
 
     private fun navigateThroughLocations(locations: List<LatLng>) {

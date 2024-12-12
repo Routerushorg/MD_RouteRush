@@ -21,11 +21,12 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
     val error: LiveData<String> get() = _error
 
 
-    private val _optimizedRoute =  MutableLiveData<List<String>>()
+
+    private val _optimizedRoute = MutableLiveData<List<String>>()
     val optimizedRoute: LiveData<List<String>> get() = _optimizedRoute
 
-    private val _optimizedRouteToAddresses = MutableLiveData<List<String>>()
-    val optimizedRouteToAddresses: LiveData<List<String>> get() = _optimizedRouteToAddresses
+    private val _addressHistory = MutableLiveData<List<String>>()
+    val addressHistory: LiveData<List<String>> get() = _addressHistory
 
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
@@ -37,28 +38,29 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
         }
     }
 
-    fun optimizeRouteToAddresses(addresses: List<String>) {
+
+    fun fetchAddressHistory() {
         viewModelScope.launch {
-            _isLoading.value = true
-            val result = repository.optimizeRouteToAddresses(addresses)
-            result.onSuccess {
-                _optimizedRouteToAddresses.value = it
-            }.onFailure { e ->
-                _error.value = e.message
+            val result = repository.getAddressHistory()
+            result.onSuccess { addresses ->
+                // Ambil 10 alamat terakhir
+                _addressHistory.value =  addresses.take(10)
+            }.onFailure { error ->
+                // Tangani kesalahan jika diperlukan
+                _addressHistory.value = emptyList()
             }
-            _isLoading.value = false
         }
     }
 
     fun optimizeRoute(addresses: List<String>) {
         viewModelScope.launch {
-            try {
-                val response = repository.optimizeRoute(addresses)
-                val optimizedRoute = response.getOrNull()?.replace("Optimized route for addresses: ", "")?.split(", ") ?: emptyList()
-                _optimizedRoute.postValue(optimizedRoute)
-            } catch (e: Exception) {
-                _error.postValue("Failed to optimize route: ${e.message}")
+            val result = repository.optimizeRoute(addresses)
+            result.onSuccess { route ->
+                _optimizedRoute.value = route
+            }.onFailure { error ->
+                _optimizedRoute.value = emptyList()
             }
         }
     }
+
 }

@@ -58,4 +58,10 @@ class LocationAdapter(private val locations: MutableList<LocationItem>,
     fun getLocations(): List<LocationItem> {
         return locations
     }
+    fun updateData(newLocations: List<LocationItem>) {
+        val size = locations.size
+        locations.clear()
+        locations.addAll(newLocations)
+        notifyItemRangeRemoved(0,size)
+    }
 }

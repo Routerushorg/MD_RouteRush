@@ -56,7 +56,8 @@
                     android:fontFamily="@font/open_sans_regular"
                     android:background="@drawable/rounded_textview"
                     android:hint="@string/email_hint"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password EditText -->
