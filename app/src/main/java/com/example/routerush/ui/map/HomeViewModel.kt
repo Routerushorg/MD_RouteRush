@@ -1,5 +1,6 @@
 package com.example.routerush.ui.map
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -53,14 +54,21 @@ class HomeViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     fun optimizeRoute(addresses: List<String>) {
+        _isLoading.value = true
         viewModelScope.launch {
-            val result = repository.optimizeRoute(addresses)
-            result.onSuccess { route ->
-                _optimizedRoute.value = route
-            }.onFailure { error ->
-                _optimizedRoute.value = emptyList()
+            try {
+                val result = repository.optimizeRoute(addresses)
+                result.onSuccess { route ->
+                    _optimizedRoute.value = route
+                }.onFailure { error ->
+                    _optimizedRoute.value = emptyList()
+                    Log.e("OptimizedRoute", "Error optimizing route: ${error.message}")
+                }
+            } finally {
+                _isLoading.value = false
             }
         }
+
     }
 
 }

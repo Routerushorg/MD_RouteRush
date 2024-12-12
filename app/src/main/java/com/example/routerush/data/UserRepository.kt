@@ -45,8 +45,8 @@ open class UserRepository private constructor(
                 val response = MlApiService.optimizeRoute(request)
 
                 if (response.isSuccessful) {
-                    response.body()?.optimizedRoute?.let {
-                        Result.success(it)
+                    response.body()?.let {
+                        Result.success(it)  // Mengembalikan List<String> jika berhasil
                     } ?: Result.failure(Exception("Optimized route not found"))
                 } else {
                     Result.failure(Exception("Failed to optimize route: ${response.message()}"))

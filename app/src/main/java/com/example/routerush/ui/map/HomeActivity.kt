@@ -75,11 +75,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.rvAddresses.layoutManager = LinearLayoutManager(this)
         binding.rvAddresses.adapter = locationAdapter
 
-        optimizedAdapter = LocationAdapter(mutableListOf()) { location ->
-            moveToLocation(location)
-        }
-        binding.rvOptimized.layoutManager = LinearLayoutManager(this)
-        binding.rvOptimized.adapter = optimizedAdapter
+        
 
         binding.svSearchAddress.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -114,10 +110,28 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         viewModel.fetchAddressHistory()
 
+
+        binding.btnOptimizeRoute.setOnClickListener {
+            val addresses = locationAdapter.getAddresses()
+            viewModel.fetchAddressHistory()
+            if (addresses.isNotEmpty()) {
+                viewModel.optimizeRoute(addresses)
+                binding.llSv.visibility= View.GONE
+                binding.rvAddresses.visibility = View.GONE
+                binding.btnOptimizeRoute.visibility = View.GONE
+                binding.llTimeAndFuel.visibility = View.VISIBLE
+                binding.rvOptimized.visibility = View.VISIBLE
+                binding.btnNavigateRoute.visibility = View.VISIBLE
+
+            } else {
+                Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         viewModel.optimizedRoute.observe(this) { route ->
+            Log.d("OptimizedRoute", "Current route: $route")
+            updateOptimizedRecyclerView(route)
             if (!route.isNullOrEmpty()) {
-                updateOptimizedRecyclerView(route)
-                Log.d("OptimizedRoute", "Route data: $route")
 
                 mMap.clear()
                 markerLocations.clear()
@@ -150,30 +164,13 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
                     )
                 }
 
-                if (newLocations.size > 1) {
-                    drawOptimizedRoute(newLocations)
+                if (markerLocations.size > 1) {
+                    drawOptimizedRoute(markerLocations)
+
                 }
 
             }
         }
-        binding.btnOptimizeRoute.setOnClickListener {
-            val addresses = locationAdapter.getAddresses()
-            viewModel.fetchAddressHistory()
-            updateOptimizedRecyclerView(addresses)
-            if (addresses.isNotEmpty()) {
-                viewModel.optimizeRoute(addresses)
-                binding.llSv.visibility= View.GONE
-                binding.rvAddresses.visibility = View.GONE
-                binding.btnOptimizeRoute.visibility = View.GONE
-                binding.llTimeAndFuel.visibility = View.VISIBLE
-                binding.rvOptimized.visibility = View.VISIBLE
-                binding.btnNavigateRoute.visibility = View.VISIBLE
-
-            } else {
-                Toast.makeText(this, "No addresses to optimize!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
 
         binding.btnBack.setOnClickListener {
             binding.llSv.visibility= View.VISIBLE
@@ -296,6 +293,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
         }
     }
+
     private fun drawOptimizedRoute(locations: List<LatLng>) {
         lifecycleScope.launch {
             try {
@@ -330,6 +328,11 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
         val optimizedLocations = route.map { address ->
             LocationItem(address, 0.0, 0.0)
         }
+        optimizedAdapter = LocationAdapter(mutableListOf()) { location ->
+            moveToLocation(location)
+        }
+        binding.rvOptimized.layoutManager = LinearLayoutManager(this)
+        binding.rvOptimized.adapter = optimizedAdapter
         optimizedAdapter.updateData(optimizedLocations) // Buat fungsi di adapter
     }
 
@@ -431,7 +434,7 @@ class HomeActivity : AppCompatActivity(), OnMapReadyCallback {
             val origin = markerLocations[0]
             val destination = markerLocations[markerLocations.size - 1]
             val waypoints = markerLocations.subList(1, markerLocations.size - 1)
-            val url = getDirectionURL(origin, destination,waypoints)
+            val url = getDirectionURL(origin, destination, waypoints)
 
             // Panggil coroutine untuk mendapatkan data rute
             lifecycleScope.launch {
