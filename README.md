@@ -19,5 +19,6 @@ Route Rush is a powerful route optimization application designed to provide effi
 ### Third-Party Integrations
 - **Maps API**: Google Maps
 
-
+### Deployed APK LINK
+https://drive.google.com/file/d/15ApvsG0wM1GqD-84nzNzqKoHENyR_pUd/view?usp=drive_link
 
